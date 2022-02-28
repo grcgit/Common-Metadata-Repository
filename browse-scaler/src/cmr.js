@@ -10,6 +10,7 @@ const { setValue, getValue } = require ('./in-memory-cache')
  * if no token is supplied.
  */
 const getAuthorizationToken = async () => {
+  return 'mock-echo-system-token'
   console.log('Fetching Echo-Token [' + config.CMR_ENVIRONMENT + '] from store');
   let authorizationToken = getValue('CMR_ECHO_SYSTEM_TOKEN')
   
@@ -57,6 +58,29 @@ const fetchConceptFromCMR = async (conceptId, cmrEndpoint) => {
         console.log(`Could not find concept ${conceptId}: ${error}`);
       });
   return response;
+};
+
+exports.fetchCMR = async (destination) => {
+  const token = config.CMR_ECHO_TOKEN || await getAuthorizationToken();
+  // const response = await fetch(destination, {
+  //   method: 'GET',
+  //   headers: {
+  //     'Authorization': token
+  //   }
+  // });
+
+  // const body = await response.text();
+  // console.log(body);
+  // return body;
+  const response = await fetch(destination, {
+    method: 'GET',
+    headers: {
+      'Authorization': token
+    }
+  });
+  const data = await response.text();
+  console.log(data);
+  return data;
 };
 
 /**
