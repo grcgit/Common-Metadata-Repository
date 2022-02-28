@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="25" failures="4" time="18.683">
+  <testsuite name="testing in memory token cache" errors="0" failures="0" skipped="0" timestamp="2022-02-23T03:45:55" time="0.347" tests="2">
+    <testcase classname="testing in memory token cache getting value before token is set" name="testing in memory token cache getting value before token is set" time="0.001">
+    </testcase>
+    <testcase classname="testing in memory token cache round trip" name="testing in memory token cache round trip" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="Image resizing" errors="0" failures="0" skipped="0" timestamp="2022-02-23T03:45:55" time="0.471" tests="4">
+    <testcase classname="Image resizing Images are resized as expected" name="Image resizing Images are resized as expected" time="0.018">
+    </testcase>
+    <testcase classname="Image resizing Images aspect ratios are maintained when image sizes do not match" name="Image resizing Images aspect ratios are maintained when image sizes do not match" time="0.011">
+    </testcase>
+    <testcase classname="Image resizing Resize image to be smaller than original, then larger than original" name="Image resizing Resize image to be smaller than original, then larger than original" time="0.021">
+    </testcase>
+    <testcase classname="notFound returns buffer" name="notFound returns buffer" time="0.007">
+    </testcase>
+  </testsuite>
+  <testsuite name="slurpImageIntoBuffer" errors="0" failures="0" skipped="1" timestamp="2022-02-23T03:45:55" time="0.56" tests="6">
+    <testcase classname="slurpImageIntoBuffer handles 200" name="slurpImageIntoBuffer handles 200" time="0.037">
+    </testcase>
+    <testcase classname="slurpImageIntoBuffer handles 404" name="slurpImageIntoBuffer handles 404" time="0.005">
+    </testcase>
+    <testcase classname="getSecureParam handles success" name="getSecureParam handles success" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="readFile returns file content" name="readFile returns file content" time="0.002">
+    </testcase>
+    <testcase classname="withTimeout timeout expires before promise" name="withTimeout timeout expires before promise" time="0.002">
+    </testcase>
+    <testcase classname="withTimeout promise resolves before timeout" name="withTimeout promise resolves before timeout" time="0.002">
+    </testcase>
+  </testsuite>
+  <testsuite name="cache tests" errors="0" failures="0" skipped="0" timestamp="2022-02-23T03:45:55" time="0.674" tests="3">
+    <testcase classname="cache tests data round trip" name="cache tests data round trip" time="0.037">
+    </testcase>
+    <testcase classname="cache tests &quot;null&quot; string entry" name="cache tests &quot;null&quot; string entry" time="0.002">
+    </testcase>
+    <testcase classname="cache tests key does not exist" name="cache tests key does not exist" time="0.002">
+    </testcase>
+  </testsuite>
+  <testsuite name="handler functions" errors="0" failures="0" skipped="0" timestamp="2022-02-23T03:45:55" time="1.756" tests="2">
+    <testcase classname="handler functions get collection(dataset) imagery no errors" name="handler functions get collection(dataset) imagery no errors" time="1.035">
+    </testcase>
+    <testcase classname="handler functions get granule imagery no errors" name="handler functions get granule imagery no errors" time="0.043">
+    </testcase>
+  </testsuite>
+  <testsuite name="Metadata wrangling" errors="0" failures="4" skipped="1" timestamp="2022-02-23T03:45:55" time="18.467" tests="8">
+    <testcase classname="Metadata wrangling Get image url from collection with browse url" name="Metadata wrangling Get image url from collection with browse url" time="0.001">
+    </testcase>
+    <testcase classname="Metadata wrangling Get image url from collection without browse url" name="Metadata wrangling Get image url from collection without browse url" time="0">
+    </testcase>
+    <testcase classname="Metadata wrangling Get image url from granule without browse url" name="Metadata wrangling Get image url from granule without browse url" time="0">
+    </testcase>
+    <testcase classname="getCollectionLevelBrowseImage handles 200 returns imagery url" name="getCollectionLevelBrowseImage handles 200 returns imagery url" time="5.004">
+      <failure>: Timeout - Async callback was not invoked within the 5000ms timeout specified by jest.setTimeout.Timeout - Async callback was not invoked within the 5000ms timeout specified by jest.setTimeout.Error: 
+    at new Spec (/home/george/cmr/browse-scaler/src/node_modules/jest-jasmine2/build/jasmine/Spec.js:116:22)
+    at new Spec (/home/george/cmr/browse-scaler/src/node_modules/jest-jasmine2/build/setup_jest_globals.js:80:9)
+    at specFactory (/home/george/cmr/browse-scaler/src/node_modules/jest-jasmine2/build/jasmine/Env.js:575:24)
+    at Env.it (/home/george/cmr/browse-scaler/src/node_modules/jest-jasmine2/build/jasmine/Env.js:644:24)
+    at Env.it (/home/george/cmr/browse-scaler/src/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:132:23)
+    at test (/home/george/cmr/browse-scaler/src/node_modules/jest-jasmine2/build/jasmine/jasmineLight.js:93:21)
+    at Suite.&lt;anonymous&gt; (/home/george/cmr/browse-scaler/src/__tests__/cmr.test.js:43:9)
+    at addSpecsToSuite (/home/george/cmr/browse-scaler/src/node_modules/jest-jasmine2/build/jasmine/Env.js:496:51)
+    at Env.describe (/home/george/cmr/browse-scaler/src/node_modules/jest-jasmine2/build/jasmine/Env.js:466:11)
+    at describe (/home/george/cmr/browse-scaler/src/node_modules/jest-jasmine2/build/jasmine/jasmineLight.js:81:18)</failure>
+    </testcase>
+    <testcase classname="getCollectionLevelBrowseImage handles invalid collection id returns undefined" name="getCollectionLevelBrowseImage handles invalid collection id returns undefined" time="4.034">
+      <failure>CredentialsError: Missing credentials in config, if using AWS_CONFIG_FILE, set AWS_SDK_LOAD_CONFIG=1
+    at Timeout.connectTimeout [as _onTimeout] (/home/george/cmr/browse-scaler/src/node_modules/aws-sdk/lib/http/node.js:69:15)
+    at listOnTimeout (internal/timers.js:531:17)
+    at processTimers (internal/timers.js:475:7)</failure>
+      <failure>CredentialsError: Missing credentials in config, if using AWS_CONFIG_FILE, set AWS_SDK_LOAD_CONFIG=1
+    at Timeout.connectTimeout [as _onTimeout] (/home/george/cmr/browse-scaler/src/node_modules/aws-sdk/lib/http/node.js:69:15)
+    at listOnTimeout (internal/timers.js:531:17)
+    at processTimers (internal/timers.js:475:7)</failure>
+    </testcase>
+    <testcase classname="getGranuleLevelBrowseImage handles 200 returns imagery url" name="getGranuleLevelBrowseImage handles 200 returns imagery url" time="5.002">
+      <failure>: Timeout - Async callback was not invoked within the 5000ms timeout specified by jest.setTimeout.Timeout - Async callback was not invoked within the 5000ms timeout specified by jest.setTimeout.Error: 
+    at new Spec (/home/george/cmr/browse-scaler/src/node_modules/jest-jasmine2/build/jasmine/Spec.js:116:22)
+    at new Spec (/home/george/cmr/browse-scaler/src/node_modules/jest-jasmine2/build/setup_jest_globals.js:80:9)
+    at specFactory (/home/george/cmr/browse-scaler/src/node_modules/jest-jasmine2/build/jasmine/Env.js:575:24)
+    at Env.it (/home/george/cmr/browse-scaler/src/node_modules/jest-jasmine2/build/jasmine/Env.js:644:24)
+    at Env.it (/home/george/cmr/browse-scaler/src/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:132:23)
+    at test (/home/george/cmr/browse-scaler/src/node_modules/jest-jasmine2/build/jasmine/jasmineLight.js:93:21)
+    at Suite.&lt;anonymous&gt; (/home/george/cmr/browse-scaler/src/__tests__/cmr.test.js:69:9)
+    at addSpecsToSuite (/home/george/cmr/browse-scaler/src/node_modules/jest-jasmine2/build/jasmine/Env.js:496:51)
+    at Env.describe (/home/george/cmr/browse-scaler/src/node_modules/jest-jasmine2/build/jasmine/Env.js:466:11)
+    at describe (/home/george/cmr/browse-scaler/src/node_modules/jest-jasmine2/build/jasmine/jasmineLight.js:81:18)</failure>
+    </testcase>
+    <testcase classname="getGranuleLevelBrowseImage not found handles 404" name="getGranuleLevelBrowseImage not found handles 404" time="3.738">
+      <failure>CredentialsError: Missing credentials in config, if using AWS_CONFIG_FILE, set AWS_SDK_LOAD_CONFIG=1
+    at Timeout.connectTimeout [as _onTimeout] (/home/george/cmr/browse-scaler/src/node_modules/aws-sdk/lib/http/node.js:69:15)
+    at listOnTimeout (internal/timers.js:531:17)
+    at processTimers (internal/timers.js:475:7)</failure>
+      <failure>CredentialsError: Missing credentials in config, if using AWS_CONFIG_FILE, set AWS_SDK_LOAD_CONFIG=1
+    at Timeout.connectTimeout [as _onTimeout] (/home/george/cmr/browse-scaler/src/node_modules/aws-sdk/lib/http/node.js:69:15)
+    at listOnTimeout (internal/timers.js:531:17)
+    at processTimers (internal/timers.js:475:7)</failure>
+    </testcase>
+    <testcase classname="getEchoToken fetches token from AWS param store" name="getEchoToken fetches token from AWS param store" time="0">
+      <skipped/>
+    </testcase>
+  </testsuite>
+</testsuites>

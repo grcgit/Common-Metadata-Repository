@@ -13,17 +13,16 @@ function strToInt (strVal, radix = 10) {
 
 exports.TIMEOUT_INTERVAL =  strToInt (process.env.EXTERNAL_REQUEST_TIMEOUT) || 1000;
 
-const CMR_ROOT = process.env.CMR_ROOT;
-// CMR operational envirionments uses internal LB as CMR root, so we use http, not https
+const CMR_ROOT = 'localhost:3003'
 const CMR_ROOT_URL = `http://${CMR_ROOT}`;
 
 /* CMR ENVIRONMENT VARIABLES */
 exports.CMR_ENVIRONMENT = process.env.CMR_ENVIRONMENT;
 exports.CMR_ROOT = CMR_ROOT;
 exports.CMR_ROOT_URL = CMR_ROOT_URL;
-exports.CMR_COLLECTION_URL = `${CMR_ROOT_URL}/search/collections.json?concept_id=`;
-exports.CMR_GRANULE_URL = `${CMR_ROOT_URL}/search/granules.json?concept_id=`;
-exports.CMR_ECHO_TOKEN = process.env.CMR_ECHO_TOKEN;
+exports.CMR_COLLECTION_URL = `${CMR_ROOT_URL}/collections.json?concept_id=`;
+exports.CMR_GRANULE_URL = `${CMR_ROOT_URL}/granules.json?concept_id=`;
+exports.CMR_ECHO_TOKEN = 'mock-echo-system-token';
 
 /* AWS Config */
 exports.AWS_REGION = process.env.AWS_REGION || 'us-east-1';

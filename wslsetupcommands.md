@@ -4,7 +4,7 @@
 - Windows 10
 - Wsl 2 
 - Visual code with remote development extension
-- Docker Desktop ( with WSL2 support enabled for distro)
+- Docker Desktop with WSL2 support enabled for distro
 
 ## WSL Distro Prerequisites
 ### Java 8
@@ -46,8 +46,12 @@ cmr setup profile
 cmr setup dev
 cmr start repl
 
--launch CMR
+- Launch CMR
 (reset)
+
+## Start Local Image Scaler (depends on CMR redis service)
+- from repo_root/browse-scaler/src
+node index.js
 
 ## Troubleshooting
 
