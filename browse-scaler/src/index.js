@@ -1,5 +1,5 @@
 const { resizeImage, notFound } = require('./resize');
-const { getCollectionLevelBrowseImage, getGranuleLevelBrowseImage, fetchCMR } = require('./cmr');
+const { getCollectionLevelBrowseImage, getGranuleLevelBrowseImage} = require('./cmr');
 const { cacheImage, getImageFromCache } = require('./cache');
 const { withTimeout, slurpImageIntoBuffer } = require('./util');
 
@@ -91,6 +91,29 @@ const resizeImageFromConceptId = async (conceptType, conceptId, height, width) =
     }
   }
 
+  //try local path
+  localUrl = imageUrl.replace("C:","/mnt/c");
+  console.log(localUrl);
+  fs.readFile(localUrl, function (err, content) {
+    if (err) {
+      console.log("Could not open local image");
+    } else {
+      console.log("Found local image");
+      if (content) {
+        resizeImage(content, height, width).then(thumbnail => {
+          if (thumbnail) {
+            cacheImage(cacheKey, thumbnail);
+            return buildResponse(thumbnail);
+          }
+        }).catch(error => {
+          console.log("Failed to resize local image");
+        })
+      }else{
+        console.log("No Image Content");
+      }
+    }
+  });
+
   console.log(`No image found for: ${conceptId}. Returning default image.`);
   const imgNotFound = await notFound();
   // scale to requested size
@@ -139,11 +162,6 @@ exports.handler = async event => {
   return resizeImageFromConceptId(args.conceptType, args.conceptId, args.h, args.w);
 };
 
-exports.testfunc = async event => {
-  return fetchCMR('http://localhost:3001/providers');
-  //return fetchCMR('http://host.docker.internal:3001/providers');
-};
-
 http.createServer(function(request, response){
   console.log(request.url);
   const string1 = request.url
@@ -165,19 +183,6 @@ http.createServer(function(request, response){
   };
 
   console.log(`Arguments: ${JSON.stringify(args)}`);
-
-  // const granuledata = fetchCMR('http://localhost:3003/granules.json?concept_id=G1200000002-JET001');
-  // //const granuledata = await granule.json();
-  // console.log(granuledata);
-
-  //response = resizeImageFromConceptId(args.conceptType, args.conceptId, args.h, args.w).then()
-  //response.end();
-  // response.writeHead(200, {'Content-Type': 'text/plain'});
-  // response.end(JSON.stringify(granuledata));
-
-  // let data = 'c3RhY2thYnVzZS5jb20=';
-  // let buff = new Buffer.from(data, 'base64');
-  // let text = buff.toString('ascii');
 
   // fs.readFile('/home/george/cmr/browse-scaler/src/ASTGTMV003_N03E021.1.jpg', function (err, content) {
   //   if (err) {
@@ -206,13 +211,6 @@ http.createServer(function(request, response){
   // });
 
   resizeImageFromConceptId(args.conceptType, args.conceptId, args.h, args.w).then(res => {
-    // statusCode: 200,
-    // headers: {
-    //   'Content-Type': 'image/png',
-    //   "Access-Control-Allow-Origin": "*"
-    // },
-    // body: image.toString('base64'),
-    // isBase64Encoded: true
 
     // response.writeHead(200, {'Content-Type': 'text/html'});
     // response.write('<img src="data:image/png;base64,')

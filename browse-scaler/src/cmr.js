@@ -60,29 +60,6 @@ const fetchConceptFromCMR = async (conceptId, cmrEndpoint) => {
   return response;
 };
 
-exports.fetchCMR = async (destination) => {
-  const token = config.CMR_ECHO_TOKEN || await getAuthorizationToken();
-  // const response = await fetch(destination, {
-  //   method: 'GET',
-  //   headers: {
-  //     'Authorization': token
-  //   }
-  // });
-
-  // const body = await response.text();
-  // console.log(body);
-  // return body;
-  const response = await fetch(destination, {
-    method: 'GET',
-    headers: {
-      'Authorization': token
-    }
-  });
-  const data = await response.text();
-  console.log(data);
-  return data;
-};
-
 /**
  * getBrowseImageFromConcept: Given a CMR concept, marshall the JSON and
  * filter any associated links to find browse images associated with the concept
