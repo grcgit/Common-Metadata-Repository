@@ -5,7 +5,9 @@ const { withTimeout, slurpImageIntoBuffer } = require('./util');
 
 const config = require ('./config');
 
-var http = require("http");
+// Importing express
+const express = require('express');
+
 var fs = require('fs');
 
 /**
@@ -162,9 +164,12 @@ exports.handler = async event => {
   return resizeImageFromConceptId(args.conceptType, args.conceptId, args.h, args.w);
 };
 
-http.createServer(function(request, response){
-  console.log(request.url);
-  const string1 = request.url
+const app = express();
+
+// Handling GET / Request
+app.get('/browse-scaler/browse_images/*', function (req, res) {
+  console.log(req.url);
+  const string1 = req.url
       .split('/')
       .filter(param => param !== 'browse-scaler' && param !== 'browse_images' && param !== '');
   console.log(string1);
@@ -172,67 +177,25 @@ http.createServer(function(request, response){
   const string2 = string1[1].split("?")
   console.log(string2);
 
-  const string3 = string2[1].split("&")
-  console.log(string3);
-
   const args = {
     conceptType: string1[0],
     conceptId: string2[0],
-    h: string3[0].substring(2),
-    w: string3[1].substring(2)
+    h: req.query.h,
+    w: req.query.w
   };
 
   console.log(`Arguments: ${JSON.stringify(args)}`);
 
-  // fs.readFile('/home/george/cmr/browse-scaler/src/ASTGTMV003_N03E021.1.jpg', function (err, content) {
-  //   if (err) {
-  //       response.writeHead(400, {'Content-type':'text/html'})
-  //       console.log(err);
-  //       response.end("No such image");    
-  //   } else {
-  //       //specify the content type in the response will be an image
-  //       response.writeHead(200,{'Content-type':'image/jpg'});
-  //       response.end(content);
-  //   }
-  // });
-
-  // fs.readFile('/home/george/cmr/browse-scaler/src/ASTGTMV003_N03E021.1.jpg', function (err, content) {
-  //   if (err) {
-  //       response.writeHead(400, {'Content-type':'text/html'})
-  //       console.log(err);
-  //       response.end("No such image");    
-  //   } else {
-  //       //specify the content type in the response will be an image
-  //       response.writeHead(200,{'Content-type':'image/png'});
-  //       response.write('<img src="data:image/png;base64,')
-  //       response.write(content);
-  //       response.end('"/>');
-  //   }
-  // });
-
-  resizeImageFromConceptId(args.conceptType, args.conceptId, args.h, args.w).then(res => {
-
-    // response.writeHead(200, {'Content-Type': 'text/html'});
-    // response.write('<img src="data:image/png;base64,')
-    // response.write(res.body);
-    // response.end('"/>');
-
-    // response.writeHead(res.statusCode,
-    // {
-    //   'Content-Type': 'image/png',
-    //   "Access-Control-Allow-Origin": "*",
-    //   'Content-Length': Buffer.byteLength(res.body),
-    //   'X-Content-Type-Options': 'nosniff'
-    // }
-    // );
-
-    response.writeHead(200,{'Content-type':'image/png'});
-    response.end(res.body);
+  resizeImageFromConceptId(args.conceptType, args.conceptId, args.h, args.w).then(image_res => {
+    res.writeHead(200,{'Content-type':'image/png'});
+    res.end(image_res.body);
   }).catch(error => {
-    response.writeHead(500);
-    response.end();
+    res.writeHead(500);
+    res.end();
   })
+})
 
-}).listen(8081);
-
-console.log('Server running at http://127.0.0.1:8081/');
+// Listening to server at port 3000
+app.listen(8081, function () {
+  console.log('Server running at http://127.0.0.1:8081/');
+})
