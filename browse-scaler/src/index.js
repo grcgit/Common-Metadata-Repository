@@ -166,7 +166,7 @@ exports.handler = async event => {
 
 const app = express();
 
-// Handling GET / Request
+// Handling GET IMAGE
 app.get('/browse-scaler/browse_images/*', function (req, res) {
   console.log(req.url);
   const string1 = req.url
@@ -193,6 +193,17 @@ app.get('/browse-scaler/browse_images/*', function (req, res) {
     res.writeHead(500);
     res.end();
   })
+})
+
+// Handling GET DATA
+app.get('/data/*', function (req, res) {
+  console.log(req.url);
+  const urlstring = req.url;
+  const datasetstring = urlstring.split("/data/")[1];
+  const datarootstring = "/mnt/c/dev/testing/jetstreamcmr/";
+  const file = datarootstring + datasetstring;
+  console.log(file);
+  res.download(file); // Set disposition and send it.
 })
 
 // Listening to server at port 3000
