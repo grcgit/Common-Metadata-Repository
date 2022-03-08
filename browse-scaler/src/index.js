@@ -9,6 +9,7 @@ const config = require ('./config');
 const express = require('express');
 
 var fs = require('fs');
+const util = require('util')
 
 /**
  * buildResponse: assembles response body to avoid code duplication
@@ -56,6 +57,19 @@ const getImageUrlFromConcept = async (conceptId, conceptType) => {
   return;
 };
 
+const readFileProm = util.promisify(fs.readFile)
+
+const resizeImageFromLocalURL = async (localUrl, height, width) => {
+  const content = await readFileProm(localUrl)
+  if (content) {
+    const thumbnail = await resizeImage(content, height, width);
+    if (thumbnail) {
+      console.log("made thumbnail of local image");
+      return thumbnail
+    }
+  }
+};
+
 /**
  * resizeImageFromConceptId: call necessary helper functions to resize an image
  * associated with a given concept-id
@@ -96,25 +110,11 @@ const resizeImageFromConceptId = async (conceptType, conceptId, height, width) =
   //try local path
   localUrl = imageUrl.replace("C:","/mnt/c");
   console.log(localUrl);
-  fs.readFile(localUrl, function (err, content) {
-    if (err) {
-      console.log("Could not open local image");
-    } else {
-      console.log("Found local image");
-      if (content) {
-        resizeImage(content, height, width).then(thumbnail => {
-          if (thumbnail) {
-            cacheImage(cacheKey, thumbnail);
-            return buildResponse(thumbnail);
-          }
-        }).catch(error => {
-          console.log("Failed to resize local image");
-        })
-      }else{
-        console.log("No Image Content");
-      }
-    }
-  });
+  const thumbnaillocal = await resizeImageFromLocalURL(localUrl, height, width);
+  if (thumbnaillocal) {
+    cacheImage(cacheKey, thumbnaillocal);
+    return buildResponse(thumbnaillocal);
+  }
 
   console.log(`No image found for: ${conceptId}. Returning default image.`);
   const imgNotFound = await notFound();
@@ -168,18 +168,13 @@ const app = express();
 
 // Handling GET IMAGE
 app.get('/browse-scaler/browse_images/*', function (req, res) {
-  console.log(req.url);
-  const string1 = req.url
+  const string1 = req.path
       .split('/')
       .filter(param => param !== 'browse-scaler' && param !== 'browse_images' && param !== '');
-  console.log(string1);
-
-  const string2 = string1[1].split("?")
-  console.log(string2);
 
   const args = {
     conceptType: string1[0],
-    conceptId: string2[0],
+    conceptId: string1[1],
     h: req.query.h,
     w: req.query.w
   };
@@ -197,12 +192,12 @@ app.get('/browse-scaler/browse_images/*', function (req, res) {
 
 // Handling GET DATA
 app.get('/data/*', function (req, res) {
-  console.log(req.url);
+  //console.log(req.url);
   const urlstring = req.url;
   const datasetstring = urlstring.split("/data/")[1];
   const datarootstring = "/mnt/c/dev/testing/jetstreamcmr/";
   const file = datarootstring + datasetstring;
-  console.log(file);
+  //console.log(file);
   res.download(file); // Set disposition and send it.
 })
 
