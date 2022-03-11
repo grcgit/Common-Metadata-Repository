@@ -4,9 +4,15 @@ const { cacheImage, getImageFromCache } = require('./cache');
 const { withTimeout, slurpImageIntoBuffer } = require('./util');
 
 const config = require ('./config');
+const secret_config = require('./secret-config')
 
 // Importing express
 const express = require('express');
+var cors = require('cors')
+const bodyParser = require("body-parser");
+const router = express.Router();
+
+const nodemailer = require('nodemailer')
 
 var fs = require('fs');
 const util = require('util')
@@ -165,6 +171,9 @@ exports.handler = async event => {
 };
 
 const app = express();
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+app.use(cors())
 
 // Handling GET IMAGE
 app.get('/browse-scaler/browse_images/*', function (req, res) {
@@ -200,6 +209,43 @@ app.get('/data/*', function (req, res) {
   //console.log(file);
   res.download(file); // Set disposition and send it.
 })
+
+// Handling POST DATA
+router.post('/data/*', function (req, res) {
+  console.log(req.body)
+
+  let transporter =nodemailer.createTransport({
+    host: secret_config.SMTP_HOST,
+    port: secret_config.SMTP_PORT,
+    secure: false,
+    auth: {
+      user: secret_config.SMTP_USER,
+      pass: secret_config.SMTP_PASSWORD,
+    },
+  });
+
+  let fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
+
+  let mailOptions = {
+    from: req.body.name,
+    to: req.body.email,
+    subject: 'Data',
+    html: `Download: ${fullUrl}`
+  };
+
+  transporter.sendMail(mailOptions, function (err, info) {
+    if (err) {
+      res.json(err);
+    } else {
+      res.json(info);
+    }
+  });
+
+  res.writeHead(200);
+  res.end(JSON.stringify(req.body))
+})
+
+app.use("/", router);
 
 // Listening to server at port 3000
 app.listen(8081, function () {
