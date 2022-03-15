@@ -14,6 +14,8 @@ const router = express.Router();
 
 const nodemailer = require('nodemailer')
 
+const crypto = require('crypto')
+
 var fs = require('fs');
 const util = require('util')
 
@@ -164,6 +166,11 @@ const parseArguments = event => {
   return args;
 };
 
+const getHash = input => {
+  let input_with_key = input + secret_config.secret_key
+  return crypto.createHash('sha1').update(input_with_key).digest('hex');
+}
+
 exports.handler = async event => {
   const args = parseArguments(event);
   console.log(`Test Attempting to resize browse image for concept: ${JSON.stringify(args)}`);
@@ -201,48 +208,61 @@ app.get('/browse-scaler/browse_images/*', function (req, res) {
 
 // Handling GET DATA
 app.get('/data/*', function (req, res) {
-  //console.log(req.url);
-  const urlstring = req.url;
-  const datasetstring = urlstring.split("/data/")[1];
-  const datarootstring = "/mnt/c/dev/testing/jetstreamcmr/";
-  const file = datarootstring + datasetstring;
-  //console.log(file);
-  res.download(file); // Set disposition and send it.
+  const urlstring = req.path;
+  let hash = getHash(urlstring)
+  if(req.query.p == hash){
+    const datasetstring = urlstring.split("/data/")[1];
+    const datarootstring = "/mnt/c/dev/testing/jetstreamcmr/";
+    const file = datarootstring + datasetstring;
+    res.download(file);
+  }else{
+    res.writeHead(404);
+    res.end();
+  }
 })
 
 // Handling POST DATA
 router.post('/data/*', function (req, res) {
-  console.log(req.body)
-
-  let transporter =nodemailer.createTransport({
-    host: secret_config.SMTP_HOST,
-    port: secret_config.SMTP_PORT,
-    secure: false,
+  let transporter = nodemailer.createTransport({
+    // host: secret_config.SMTP_HOST,
+    // port: secret_config.SMTP_PORT,
+    // secure: false,
+    service: 'Gmail',
     auth: {
       user: secret_config.SMTP_USER,
       pass: secret_config.SMTP_PASSWORD,
     },
   });
 
-  let fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
+  const urlstring = req.path;
+  let hash = getHash(urlstring)
+  let fullUrl = req.protocol + '://' + req.get('host') + urlstring + '?p=' + hash
 
   let mailOptions = {
-    from: req.body.name,
+    from: secret_config.SMTP_USER,
     to: req.body.email,
     subject: 'Data',
     html: `Download: ${fullUrl}`
   };
 
-  transporter.sendMail(mailOptions, function (err, info) {
-    if (err) {
-      res.json(err);
-    } else {
-      res.json(info);
-    }
-  });
+  if(req.query.test == 1){
+    console.log(hash)
+    console.log(fullUrl)
+  }else{
+    transporter.sendMail(mailOptions, function (err, info) {
+      //console.log("Sending Mail")
+      if (err) {
+        console.log("Error")
+        console.log(err)
+      } else {
+        //console.log("Success")
+        //console.log(info)
+      }
+    });
+  }
 
   res.writeHead(200);
-  res.end(JSON.stringify(req.body))
+  res.end()
 })
 
 app.use("/", router);
