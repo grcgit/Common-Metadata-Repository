@@ -19,6 +19,9 @@ const crypto = require('crypto')
 var fs = require('fs');
 const util = require('util')
 
+const { JsonDB } = require('node-json-db');
+const { Config } = require('node-json-db/dist/lib/JsonDBConfig');
+
 /**
  * buildResponse: assembles response body to avoid code duplication
  * @param {Buffer<Image>} image
@@ -166,6 +169,9 @@ const parseArguments = event => {
   return args;
 };
 
+var history_db = new JsonDB(new Config("REQUEST_HISTORY_DB", true, true, '#'));
+var download_db = new JsonDB(new Config("DOWNLOAD_HISTORY_DB", true, true, '#'));
+
 const getHash = input => {
   let input_with_key = input + secret_config.secret_key
   return crypto.createHash('sha1').update(input_with_key).digest('hex');
@@ -211,14 +217,29 @@ app.get('/data/*', function (req, res) {
   const urlstring = req.path;
   let hash = getHash(urlstring)
   if(req.query.p == hash){
+    var accepted = true
     const datasetstring = urlstring.split("/data/")[1];
     const datarootstring = "/mnt/c/dev/testing/jetstreamcmr/";
     const file = datarootstring + datasetstring;
     res.download(file);
   }else{
+    accepted = false
     res.writeHead(404);
     res.end();
   }
+  
+  let time = new Date().toISOString()
+
+  let entry = {
+    dataset: urlstring,
+    provided_hash: req.query.p,
+    accepted: accepted,
+    time: time,
+    remote_address: req.socket.remoteAddress,
+    x_forwarded_for: req.headers['x-forwarded-for']
+  }
+
+  download_db.push('#' + getHash(time),{entry})
 })
 
 // Handling POST DATA
@@ -234,13 +255,16 @@ router.post('/data/*', function (req, res) {
     },
   });
 
+  let user_email = req.body.email
+  let user_name = req.body.name
+
   const urlstring = req.path;
   let hash = getHash(urlstring)
   let fullUrl = req.protocol + '://' + req.get('host') + urlstring + '?p=' + hash
 
   let mailOptions = {
     from: secret_config.SMTP_USER,
-    to: req.body.email,
+    to: user_email,
     subject: 'Data',
     html: `Download: ${fullUrl}`
   };
@@ -260,6 +284,19 @@ router.post('/data/*', function (req, res) {
       }
     });
   }
+
+  let time = new Date().toISOString()
+
+  let entry = {
+    name: user_name,
+    email: user_email,
+    dataset: urlstring,
+    time: time,
+    remote_address: req.socket.remoteAddress,
+    x_forwarded_for: req.headers['x-forwarded-for']
+  }
+
+  history_db.push('#' + getHash(time),{entry})
 
   res.writeHead(200);
   res.end()
