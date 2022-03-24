@@ -1,5 +1,6 @@
-var secret_config = {}
-secret_config.SMTP_HOST = "smtp.host.com"
-secret_config.SMTP_PORT = "587"
-secret_config.SMTP_USER = "email@emailhost.com"
-secret_config.SMTP_PASSWORD = "password"
+exports.SMTP_HOST = "smtp.host.com"
+exports.SMTP_PORT = "587"
+exports.SMTP_USER = "noreply@emailhost.com"
+exports.SMTP_PASSWORD = "password*******"
+
+exports.secret_key = "examplesecretkey*****"
