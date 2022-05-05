@@ -6,6 +6,9 @@ const { withTimeout, slurpImageIntoBuffer } = require('./util');
 const config = require ('./config');
 const secret_config = require('./secret-config')
 
+const http = require('http');
+const https = require('https');
+
 // Importing express
 const express = require('express');
 var cors = require('cors')
@@ -304,7 +307,29 @@ router.post('/data/*', function (req, res) {
 
 app.use("/", router);
 
-// Listening to server at port 3000
-app.listen(8081, function () {
-  console.log('Server running at http://127.0.0.1:8081/');
-})
+// Certificate
+const privateKey = fs.readFileSync(`/etc/letsencrypt/live/${config.DOMAIN}/privkey.pem`, 'utf8');
+const certificate = fs.readFileSync(`/etc/letsencrypt/live/${config.DOMAIN}/cert.pem`, 'utf8');
+const ca = fs.readFileSync(`/etc/letsencrypt/live/${config.DOMAIN}/chain.pem`, 'utf8');
+
+const credentials = {
+	key: privateKey,
+	cert: certificate,
+	ca: ca
+};
+
+// Starting both http & https servers
+const httpServer = http.createServer(app);
+const httpsServer = https.createServer(credentials, app);
+
+httpServer.listen(8082, () => {
+	console.log('HTTP Server running on port 8082');
+});
+
+httpsServer.listen(8081, () => {
+	console.log('HTTPS Server running on port 8081');
+});
+
+// app.listen(8081, function () {
+//   console.log('Server running at http://127.0.0.1:8081/');
+// })
