@@ -307,29 +307,30 @@ router.post('/data/*', function (req, res) {
 
 app.use("/", router);
 
-// Certificate
-const privateKey = fs.readFileSync(`/etc/letsencrypt/live/${config.DOMAIN}/privkey.pem`, 'utf8');
-const certificate = fs.readFileSync(`/etc/letsencrypt/live/${config.DOMAIN}/cert.pem`, 'utf8');
-const ca = fs.readFileSync(`/etc/letsencrypt/live/${config.DOMAIN}/chain.pem`, 'utf8');
+let use_https = secret_config.USE_HTTPS
 
-const credentials = {
-	key: privateKey,
-	cert: certificate,
-	ca: ca
-};
+if(use_https){
+  // Certificate
+  const privateKey = fs.readFileSync(secret_config.privateKey, 'utf8');
+  const certificate = fs.readFileSync(secret_config.cert, 'utf8');
+  const ca = fs.readFileSync(secret_config.chain, 'utf8');
 
-// Starting both http & https servers
-const httpServer = http.createServer(app);
-const httpsServer = https.createServer(credentials, app);
+  const credentials = {
+    key: privateKey,
+    cert: certificate,
+    ca: ca
+  };
 
-httpServer.listen(8082, () => {
-	console.log('HTTP Server running on port 8082');
-});
+  const httpsServer = https.createServer(credentials, app);
 
-httpsServer.listen(8081, () => {
-	console.log('HTTPS Server running on port 8081');
-});
+  httpsServer.listen(8081, () => {
+    console.log('HTTPS Server running on port 8081');
+  });
+  
+}else{
+  const httpServer = http.createServer(app);
 
-// app.listen(8081, function () {
-//   console.log('Server running at http://127.0.0.1:8081/');
-// })
+  httpServer.listen(8081, () => {
+    console.log('HTTP Server running on port 8081');
+  });
+}
