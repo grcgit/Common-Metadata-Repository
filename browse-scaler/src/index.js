@@ -218,17 +218,27 @@ app.get('/browse-scaler/browse_images/*', function (req, res) {
 // Handling GET DATA
 app.get('/data/*', function (req, res) {
   const urlstring = req.path;
+  let accepted = false
+  if(urlstring.search("\\.\\.") == -1){ //prevent stray file downloads
+    accepted = true
+  }
   let hash = getHash(urlstring)
-  if(req.query.p == hash){
-    var accepted = true
-    const datasetstring = urlstring.split("/data/")[1];
-    const datarootstring = "/mnt/c/dev/testing/jetstreamcmr/";
-    const file = datarootstring + datasetstring;
-    res.download(file);
-  }else{
-    accepted = false
-    res.writeHead(404);
-    res.end();
+
+  if(accepted){
+    if(req.query.p == hash){    
+      const datasetstring = urlstring.split("/data/")[1];
+      const datarootstring = secret_config.DATA_DIR;
+      const file = datarootstring + datasetstring;
+      if(fs.existsSync(file)){
+        res.download(file);
+      }else{
+        res.writeHead(404);
+        res.end();
+      }
+    }else{
+      res.writeHead(404);
+      res.end();
+    }
   }
   
   let time = new Date().toISOString()
@@ -236,7 +246,7 @@ app.get('/data/*', function (req, res) {
   let entry = {
     dataset: urlstring,
     provided_hash: req.query.p,
-    accepted: accepted,
+    valid: accepted,
     time: time,
     remote_address: req.socket.remoteAddress,
     x_forwarded_for: req.headers['x-forwarded-for']
@@ -265,17 +275,23 @@ router.post('/data/*', function (req, res) {
   let hash = getHash(urlstring)
   let fullUrl = req.protocol + '://' + req.get('host') + urlstring + '?p=' + hash
 
-  let mailOptions = {
-    from: secret_config.SMTP_USER,
-    to: user_email,
-    subject: 'Data',
-    html: `Download: ${fullUrl}`
-  };
+  let legal_request = false
+  if(user_email && user_name){
+    //check if url is legitimate
+    if(urlstring.search("\\.\\.") == -1){ //prevent stray file downloads
+      legal_request = true
+    }
+  }
 
-  if(req.query.test == 1){
-    console.log(hash)
-    console.log(fullUrl)
-  }else{
+  if(legal_request == true){
+    let mailOptions = {
+      from: secret_config.SMTP_USER,
+      to: user_email,
+      bcc: secret_config.ADMIN_EMAILS,
+      subject: 'Jetstream Data Request',
+      html: `Hello ${user_name}<br>Your data is ready to be downloaded<br>${fullUrl}`
+    };
+
     transporter.sendMail(mailOptions, function (err, info) {
       //console.log("Sending Mail")
       if (err) {
@@ -286,23 +302,27 @@ router.post('/data/*', function (req, res) {
         //console.log(info)
       }
     });
-  }
 
+    res.writeHead(200);
+    res.end()
+  }else{
+    res.writeHead(404);
+    res.end();
+  }
+  
   let time = new Date().toISOString()
 
   let entry = {
     name: user_name,
     email: user_email,
     dataset: urlstring,
+    valid: legal_request,
     time: time,
     remote_address: req.socket.remoteAddress,
     x_forwarded_for: req.headers['x-forwarded-for']
   }
 
   history_db.push('#' + getHash(time),{entry})
-
-  res.writeHead(200);
-  res.end()
 })
 
 app.use("/", router);
