@@ -197,13 +197,20 @@ app.get('/browse-scaler/browse_images/*', function (req, res) {
       .split('/')
       .filter(param => param !== 'browse-scaler' && param !== 'browse_images' && param !== '');
 
-  const args = {
+  let args = {
     conceptType: string1[0],
     conceptId: string1[1],
     h: req.query.h,
     w: req.query.w
   };
 
+  if(args.h > 512){
+    args.h = 512
+  }
+
+  if(args.w > 512){
+    args.w = 512
+  }
   console.log(`Arguments: ${JSON.stringify(args)}`);
 
   resizeImageFromConceptId(args.conceptType, args.conceptId, args.h, args.w).then(image_res => {
