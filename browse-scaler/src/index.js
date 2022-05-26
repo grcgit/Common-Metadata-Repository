@@ -226,7 +226,7 @@ app.get('/browse-scaler/browse_images/*', function (req, res) {
 app.get('/data/*', function (req, res) {
   const urlstring = req.path;
   let accepted = false
-  if(urlstring.search("\\.\\.") == -1){ //prevent stray file downloads
+  if(urlstring.search("\\.\\./") == -1){ //prevent stray file downloads
     accepted = true
   }
   let hash = getHash(urlstring)
@@ -285,8 +285,11 @@ router.post('/data/*', function (req, res) {
   let legal_request = false
   if(user_email && user_name){
     //check if url is legitimate
-    if(urlstring.search("\\.\\.") == -1){ //prevent stray file downloads
+    if(urlstring.search("\\.\\./") == -1){ //prevent stray file downloads
       legal_request = true
+    }else{
+      //console.log(urlstring)
+      //console.log("Bad Path")
     }
   }
 
@@ -313,6 +316,7 @@ router.post('/data/*', function (req, res) {
     res.writeHead(200);
     res.end()
   }else{
+    //console.log("Bad Request")
     res.writeHead(404);
     res.end();
   }
