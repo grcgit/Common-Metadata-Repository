@@ -44,10 +44,24 @@ cmr install oracle-libs
 cmr setup profile
 - replace passwords
 cmr setup dev
-cmr start repl
 
+### REPL
 - Launch CMR
+cmr start repl
 (reset)
+
+- Stop CMR
+(stop)
+(exit)
+
+### JAR
+- Launch CMR
+cmr build uberjars
+cmr build all
+cmr start uberjar dev-system
+
+- Stop CMR
+cmr stop uberjar dev-system
 
 ## Start Local Image Scaler (depends on CMR redis service)
 - from repo_root/browse-scaler/src
@@ -59,4 +73,23 @@ node index.js
 - To free ports if been held by hypervisor
 netcfg -d 
 
+## Exporting and Importing WSL images onto another machine
+
+### Export to tar image
+wsl --list
+wsl --export <WSL Image Name> <Export file>
+eg. wsl --export ubuntu2004 ubuntu2004.tar
+
+### Import to wsl distro
+wsl –import <Image Name you choose> <Directory to store and run the image> <Directory location of the exported .tar file>
+eg. wsl –import ubuntu2004 c:\ubuntu2004 ubuntu2004.tar
+
+### Set Default User
+create /etc/wsl.conf with following contents
+[user]
+default=username
+
+### Port Proxies to wsl instance
+setup ports 3003,8081,8080,80,443
+netsh interface portproxy add v4tov4 listenport=3003 listenaddress=0.0.0.0 connectport=3003 connectaddress=172.1.1.1
 
