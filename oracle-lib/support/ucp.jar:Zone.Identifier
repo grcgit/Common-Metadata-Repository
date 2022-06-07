@@ -1,3 +1,4 @@
 [ZoneTransfer]
 ZoneId=3
-HostUrl=https://download.oracle.com/otn/utilities_drivers/jdbc/121020/ucp.jar?AuthParam=1643253540_ddf91af99067a8ffda76c588e4b0ee29
+ReferrerUrl=https://www.oracle.com/au/database/technologies/appdev/jdbc-downloads.html
+HostUrl=https://download.oracle.com/otn-pub/otn_software/jdbc/215/ucp.jar?AuthParam=1654224659_e7c410fe029988a58fb0d3dedefc6dc7
