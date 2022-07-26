@@ -81,8 +81,9 @@ wsl --export <WSL Image Name> <Export file>
 eg. wsl --export ubuntu2004 ubuntu2004.tar
 
 ### Import to wsl distro
-wsl –import <Image Name you choose> <Directory to store and run the image> <Directory location of the exported .tar file>
-eg. wsl –import ubuntu2004 c:\ubuntu2004 ubuntu2004.tar
+wsl --import <Image Name you choose> <Directory to store and run the image> <Directory location of the exported .tar file>
+eg. wsl --import ubuntu2004 c:\ubuntu2004 ubuntu2004.tar
+eg. wsl --import ubuntu2004v2 c:\ubuntu2004v2 C:\wsl-images\ubuntu2004_v2.tar
 
 ### Set Default User
 create /etc/wsl.conf with following contents
@@ -90,6 +91,11 @@ create /etc/wsl.conf with following contents
 default=username
 
 ### Port Proxies to wsl instance
-setup ports 3003,8081,8080,80,443
+- setup ports 3003,8081,8080,80,443
+- from administrator elevated powershell
+- get ip of wsl
+wsl hostname -I
 netsh interface portproxy add v4tov4 listenport=3003 listenaddress=0.0.0.0 connectport=3003 connectaddress=172.1.1.1
+-or run ps script
+configure_ports.ps1
 
