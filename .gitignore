@@ -5,6 +5,7 @@
 /.lein-*
 profiles.clj
 browse-scaler/src/node_modules
+proxy/node_modules
 .classpath
 .project
 *.prefs
