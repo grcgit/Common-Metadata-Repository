@@ -71,6 +71,7 @@ const getImageUrlFromConcept = async (conceptId, conceptType) => {
   console.error(
     `Unable to fetch imagery for concept-type: ${conceptType} on concept-id ${conceptId}`
   );
+  return null;
 };
 
 const readFileProm = util.promisify(fs.readFile);
@@ -84,6 +85,7 @@ const resizeImageFromLocalURL = async (localUrl, height, width) => {
       return thumbnail;
     }
   }
+  return null;
 };
 
 /**
@@ -240,7 +242,7 @@ app.get('/data/*', function getData(req, res) {
   const hash = getHash(urlstring);
 
   if (accepted) {
-    if (req.query.p == hash) {
+    if (req.query.p === hash) {
       const datasetstring = urlstring.split('/data/')[1];
       const datarootstring = secretConfig.DATA_DIR;
       const file = datarootstring + datasetstring;
@@ -267,6 +269,8 @@ app.get('/data/*', function getData(req, res) {
     x_forwarded_for: req.headers['x-forwarded-for']
   };
 
+  console.log(entry);
+
   downloadDB.push(`#${getHash(time)}`, { entry });
 });
 
@@ -289,7 +293,9 @@ router.post('/data/*', function postData(req, res) {
   const hash = getHash(urlstring);
   const fullUrl = `${secretConfig.PROXYSERVER}${urlstring}?p=${hash}`;
 
-  console.log(fullUrl);
+  // console.log(userName);
+  // console.log(userEmail);
+  // console.log(fullUrl);
 
   let legalRequest = false;
   if (userEmail && userName) {
@@ -339,6 +345,8 @@ router.post('/data/*', function postData(req, res) {
     remote_address: req.socket.remoteAddress,
     x_forwarded_for: req.headers['x-forwarded-for']
   };
+
+  console.log(entry);
 
   historyDB.push(`#${getHash(time)}`, { entry });
 });
