@@ -19,6 +19,20 @@ app.use('/search', createProxyMiddleware({
   }
 }))
 
+app.use('/browse-scaler', createProxyMiddleware({
+  target: 'http://localhost:8082',
+  changeOrigin: true,
+  pathRewrite: {
+  }
+}))
+
+app.use('/data', createProxyMiddleware({
+  target: 'http://localhost:8082',
+  changeOrigin: true,
+  pathRewrite: {
+  }
+}))
+
 if (secretConfig.USE_HTTPS) {
   // Certificate
   const privateKey = fs.readFileSync(secretConfig.privateKey, 'utf8')

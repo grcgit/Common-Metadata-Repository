@@ -1,29 +1,29 @@
 const { resizeImage, notFound } = require('./resize');
-const { getCollectionLevelBrowseImage, getGranuleLevelBrowseImage} = require('./cmr');
-const { cacheImage, getImageFromCache } = require('./cache');
-const { withTimeout, slurpImageIntoBuffer } = require('./util');
-
-const config = require ('./config');
-const secret_config = require('./secret-config')
+const { getCollectionLevelBrowseImage, getGranuleLevelBrowseImage } = require('./cmr');
 
 const http = require('http');
 const https = require('https');
 
 // Importing express
 const express = require('express');
-var cors = require('cors')
-const bodyParser = require("body-parser");
+const cors = require('cors');
+const bodyParser = require('body-parser');
+
 const router = express.Router();
 
-const nodemailer = require('nodemailer')
+const nodemailer = require('nodemailer');
 
-const crypto = require('crypto')
+const crypto = require('crypto');
 
-var fs = require('fs');
-const util = require('util')
+const fs = require('fs');
+const util = require('util');
 
 const { JsonDB } = require('node-json-db');
 const { Config } = require('node-json-db/dist/lib/JsonDBConfig');
+const secretConfig = require('./secret-config');
+const config = require('./config');
+const { withTimeout, slurpImageIntoBuffer } = require('./util');
+const { cacheImage, getImageFromCache } = require('./cache');
 
 /**
  * buildResponse: assembles response body to avoid code duplication
@@ -31,16 +31,16 @@ const { Config } = require('node-json-db/dist/lib/JsonDBConfig');
  * @returns {JSON} assembled response object with image as a base64 string
  */
 const buildResponse = image => {
-  //console.log('Image Dump');
-  //console.log(image);
+  // console.log('Image Dump');
+  // console.log(image);
   return {
     statusCode: 200,
     headers: {
       'Content-Type': 'image/png',
-      "Access-Control-Allow-Origin": "*"
+      'Access-Control-Allow-Origin': '*'
     },
-    //body: image.toString('base64'),
-    //body: image.toString('ascii'),
+    // body: image.toString('base64'),
+    // body: image.toString('ascii'),
     body: image,
     isBase64Encoded: true
   };
@@ -63,23 +63,25 @@ const getImageUrlFromConcept = async (conceptId, conceptType) => {
 
   if (conceptType === 'granules') {
     return getGranuleLevelBrowseImage(conceptId);
-  } else if (conceptType === 'datasets') {
+  }
+  if (conceptType === 'datasets') {
     return getCollectionLevelBrowseImage(conceptId);
   }
 
-  console.error (`Unable to fetch imagery for concept-type: ${conceptType} on concept-id ${conceptId}`)
-  return;
+  console.error(
+    `Unable to fetch imagery for concept-type: ${conceptType} on concept-id ${conceptId}`
+  );
 };
 
-const readFileProm = util.promisify(fs.readFile)
+const readFileProm = util.promisify(fs.readFile);
 
 const resizeImageFromLocalURL = async (localUrl, height, width) => {
-  const content = await readFileProm(localUrl)
+  const content = await readFileProm(localUrl);
   if (content) {
     const thumbnail = await resizeImage(content, height, width);
     if (thumbnail) {
-      console.log("made thumbnail of local image");
-      return thumbnail
+      console.log('made thumbnail of local image');
+      return thumbnail;
     }
   }
 };
@@ -99,7 +101,7 @@ const resizeImageFromConceptId = async (conceptType, conceptId, height, width) =
   if (imageFromCache) {
     console.log(`Returning cached image ${cacheKey}`);
     const br = buildResponse(imageFromCache);
-    //console.log(br);
+    // console.log(br);
     return br;
   }
 
@@ -121,8 +123,8 @@ const resizeImageFromConceptId = async (conceptType, conceptId, height, width) =
     }
   }
 
-  //try local path
-  localUrl = imageUrl.replace("C:","/mnt/c");
+  // try local path
+  const localUrl = imageUrl.replace('C:', '/mnt/c');
   console.log(localUrl);
   const thumbnaillocal = await resizeImageFromLocalURL(localUrl, height, width);
   if (thumbnaillocal) {
@@ -151,8 +153,8 @@ const resizeImageFromConceptId = async (conceptType, conceptId, height, width) =
  */
 const parseArguments = event => {
   const pathParams = event.path
-      .split('/')
-      .filter(param => param !== 'browse-scaler' && param !== 'browse_images' && param !== '');
+    .split('/')
+    .filter(param => param !== 'browse-scaler' && param !== 'browse_images' && param !== '');
 
   const args = {
     conceptType: pathParams[0],
@@ -172,13 +174,16 @@ const parseArguments = event => {
   return args;
 };
 
-var history_db = new JsonDB(new Config("REQUEST_HISTORY_DB", true, true, '#'));
-var download_db = new JsonDB(new Config("DOWNLOAD_HISTORY_DB", true, true, '#'));
+const historyDB = new JsonDB(new Config('REQUEST_HISTORY_DB', true, true, '#'));
+const downloadDB = new JsonDB(new Config('DOWNLOAD_HISTORY_DB', true, true, '#'));
 
 const getHash = input => {
-  let input_with_key = input + secret_config.secret_key
-  return crypto.createHash('sha1').update(input_with_key).digest('hex');
-}
+  const inputWithKey = input + secretConfig.secret_key;
+  return crypto
+    .createHash('sha1')
+    .update(inputWithKey)
+    .digest('hex');
+};
 
 exports.handler = async event => {
   const args = parseArguments(event);
@@ -189,179 +194,180 @@ exports.handler = async event => {
 const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use(cors())
+app.use(cors());
 
 // Handling GET IMAGE
-app.get('/browse-scaler/browse_images/*', function (req, res) {
+app.get('/browse-scaler/browse_images/*', function getImage(req, res) {
   const string1 = req.path
-      .split('/')
-      .filter(param => param !== 'browse-scaler' && param !== 'browse_images' && param !== '');
+    .split('/')
+    .filter(param => param !== 'browse-scaler' && param !== 'browse_images' && param !== '');
 
-  let args = {
+  const args = {
     conceptType: string1[0],
     conceptId: string1[1],
     h: req.query.h,
     w: req.query.w
   };
 
-  if(args.h > 512){
-    args.h = 512
+  if (args.h > 512) {
+    args.h = 512;
   }
 
-  if(args.w > 512){
-    args.w = 512
+  if (args.w > 512) {
+    args.w = 512;
   }
   console.log(`Arguments: ${JSON.stringify(args)}`);
 
-  resizeImageFromConceptId(args.conceptType, args.conceptId, args.h, args.w).then(image_res => {
-    res.writeHead(200,{'Content-type':'image/png'});
-    res.end(image_res.body);
-  }).catch(error => {
-    res.writeHead(500);
-    res.end();
-  })
-})
+  resizeImageFromConceptId(args.conceptType, args.conceptId, args.h, args.w)
+    .then(imageRes => {
+      res.writeHead(200, { 'Content-type': 'image/png' });
+      res.end(imageRes.body);
+    })
+    .catch(() => {
+      res.writeHead(500);
+      res.end();
+    });
+});
 
 // Handling GET DATA
-app.get('/data/*', function (req, res) {
+app.get('/data/*', function getData(req, res) {
   const urlstring = req.path;
-  let accepted = false
-  if(urlstring.search("\\.\\./") == -1){ //prevent stray file downloads
-    accepted = true
+  let accepted = false;
+  if (urlstring.search('\\.\\./') === -1) {
+    // prevent stray file downloads
+    accepted = true;
   }
-  let hash = getHash(urlstring)
+  const hash = getHash(urlstring);
 
-  if(accepted){
-    if(req.query.p == hash){    
-      const datasetstring = urlstring.split("/data/")[1];
-      const datarootstring = secret_config.DATA_DIR;
+  if (accepted) {
+    if (req.query.p == hash) {
+      const datasetstring = urlstring.split('/data/')[1];
+      const datarootstring = secretConfig.DATA_DIR;
       const file = datarootstring + datasetstring;
-      if(fs.existsSync(file)){
+      if (fs.existsSync(file)) {
         res.download(file);
-      }else{
+      } else {
         res.writeHead(404);
         res.end();
       }
-    }else{
+    } else {
       res.writeHead(404);
       res.end();
     }
   }
-  
-  let time = new Date().toISOString()
 
-  let entry = {
+  const time = new Date().toISOString();
+
+  const entry = {
     dataset: urlstring,
     provided_hash: req.query.p,
     valid: accepted,
-    time: time,
+    time,
     remote_address: req.socket.remoteAddress,
     x_forwarded_for: req.headers['x-forwarded-for']
-  }
+  };
 
-  download_db.push('#' + getHash(time),{entry})
-})
+  downloadDB.push(`#${getHash(time)}`, { entry });
+});
 
 // Handling POST DATA
-router.post('/data/*', function (req, res) {
-  let transporter = nodemailer.createTransport({
+router.post('/data/*', function postData(req, res) {
+  const transporter = nodemailer.createTransport({
     // host: secret_config.SMTP_HOST,
     // port: secret_config.SMTP_PORT,
     // secure: false,
     service: 'Gmail',
     auth: {
-      user: secret_config.SMTP_USER,
-      pass: secret_config.SMTP_PASSWORD,
-    },
+      user: secretConfig.SMTP_USER,
+      pass: secretConfig.SMTP_PASSWORD
+    }
   });
 
-  let user_email = req.body.email
-  let user_name = req.body.name
+  const { userEmail, userName } = req.body;
 
   const urlstring = req.path;
-  let hash = getHash(urlstring)
-  let fullUrl = req.protocol + '://' + req.get('host') + urlstring + '?p=' + hash
+  const hash = getHash(urlstring);
+  const fullUrl = `${secretConfig.PROXYSERVER}${urlstring}?p=${hash}`;
 
-  let legal_request = false
-  if(user_email && user_name){
-    //check if url is legitimate
-    if(urlstring.search("\\.\\./") == -1){ //prevent stray file downloads
-      legal_request = true
-    }else{
-      //console.log(urlstring)
-      //console.log("Bad Path")
+  console.log(fullUrl);
+
+  let legalRequest = false;
+  if (userEmail && userName) {
+    // check if url is legitimate
+    if (urlstring.search('\\.\\./') === -1) {
+      // prevent stray file downloads
+      legalRequest = true;
+    } else {
+      // console.log(urlstring)
+      // console.log("Bad Path")
     }
   }
 
-  if(legal_request == true){
-    let mailOptions = {
-      from: secret_config.SMTP_USER,
-      to: user_email,
-      bcc: secret_config.ADMIN_EMAILS,
+  if (legalRequest === true) {
+    const mailOptions = {
+      from: secretConfig.SMTP_USER,
+      to: userEmail,
+      bcc: secretConfig.ADMIN_EMAILS,
       subject: 'Jetstream Data Request',
-      html: `Hello ${user_name}<br>Your data is ready to be downloaded<br>${fullUrl}`
+      html: `Hello ${userName}<br>Your data is ready to be downloaded<br>${fullUrl}`
     };
 
-    transporter.sendMail(mailOptions, function (err, info) {
-      //console.log("Sending Mail")
+    transporter.sendMail(mailOptions, function sendMailConsoleLog(err) {
+      // console.log("Sending Mail")
       if (err) {
-        console.log("Error")
-        console.log(err)
-      } else {
-        //console.log("Success")
-        //console.log(info)
+        console.log('Error');
+        console.log(err);
       }
     });
 
     res.writeHead(200);
-    res.end()
-  }else{
-    //console.log("Bad Request")
+    res.end();
+  } else {
+    // console.log("Bad Request")
     res.writeHead(404);
     res.end();
   }
-  
-  let time = new Date().toISOString()
 
-  let entry = {
-    name: user_name,
-    email: user_email,
+  const time = new Date().toISOString();
+
+  const entry = {
+    name: userName,
+    email: userEmail,
     dataset: urlstring,
-    valid: legal_request,
-    time: time,
+    valid: legalRequest,
+    time,
     remote_address: req.socket.remoteAddress,
     x_forwarded_for: req.headers['x-forwarded-for']
-  }
+  };
 
-  history_db.push('#' + getHash(time),{entry})
-})
+  historyDB.push(`#${getHash(time)}`, { entry });
+});
 
-app.use("/", router);
+app.use('/', router);
 
-let use_https = secret_config.USE_HTTPS
+const { PORT } = secretConfig;
 
-if(use_https){
+if (secretConfig.USE_HTTPS) {
   // Certificate
-  const privateKey = fs.readFileSync(secret_config.privateKey, 'utf8');
-  const certificate = fs.readFileSync(secret_config.cert, 'utf8');
-  const ca = fs.readFileSync(secret_config.chain, 'utf8');
+  const privateKey = fs.readFileSync(secretConfig.privateKey, 'utf8');
+  const certificate = fs.readFileSync(secretConfig.cert, 'utf8');
+  const ca = fs.readFileSync(secretConfig.chain, 'utf8');
 
   const credentials = {
     key: privateKey,
     cert: certificate,
-    ca: ca
+    ca
   };
 
   const httpsServer = https.createServer(credentials, app);
 
-  httpsServer.listen(8081, () => {
-    console.log('HTTPS Server running on port 8081');
+  httpsServer.listen(PORT, () => {
+    console.log(`HTTPS Server running on port ${PORT}`);
   });
-  
-}else{
+} else {
   const httpServer = http.createServer(app);
 
-  httpServer.listen(8081, () => {
-    console.log('HTTP Server running on port 8081');
+  httpServer.listen(PORT, () => {
+    console.log(`HTTP Server running on port ${PORT}`);
   });
 }
