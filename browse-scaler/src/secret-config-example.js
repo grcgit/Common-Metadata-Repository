@@ -5,7 +5,6 @@ exports.SMTP_PASSWORD = 'password*******';
 exports.ADMIN_EMAILS = ['admin@emailhost.com'];
 exports.secret_key = 'examplesecretkey*****';
 const DOMAIN = 'www.domain.com';
-exports.DOMAIN = DOMAIN;
 exports.privateKey = `/etc/letsencrypt/live/${DOMAIN}/privkey.pem`;
 exports.cert = `/etc/letsencrypt/live/${DOMAIN}/cert.pem`;
 exports.chain = `/etc/letsencrypt/live/${DOMAIN}/chain.pem`;
