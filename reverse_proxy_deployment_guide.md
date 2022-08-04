@@ -61,10 +61,12 @@ Command to stop the CMR (this will purge the database)
 
 With a running CMR, run Intrepid's project manager
 
-Navigate to the jetstream working directory `cd /home/george/cmr`
+Navigate to the jetstream working directory (something like C:\dev\testing\jetstreamcmr)
 
 If the intrepid catalog needs updating (new/deleted datasets) run the appropriate acquire catalog taskfile
+
 Run the appropriate cat2cmr taskfile to start the ingest of metadata
+
 Beware! cat2cmr can be configured to overwrite all metadata. Ensure the task file's settings reflect your intentions
 
 ## DDS
@@ -94,6 +96,9 @@ Open WSL terminal and navigate to cmr DDS directory
 
 `cd /home/george/cmr/browse-scaler/src`
 
+Check for missing npm packages
+`npm install`
+
 Start the DDS
 `npm run prod`
 
@@ -112,6 +117,9 @@ Check the settings in secret-config.js are valid
 ### Start Server
 
 Open WSL terminal and navigate to cmr proxy directory `cd /home/george/cmr/proxy`
+
+Check for missing npm packages
+`npm install`
 
 Start the proxy server
 `npm run prod`
@@ -141,6 +149,9 @@ Check the settings in secret-config.js are valid
 ### Start Server
 
 Open WSL terminal and navigate to earthdata-search directory `cd /home/george/earthdata-search/server`
+
+Check for missing npm packages
+`npm install`
 
 Start the proxy server
 `npm run prod`
