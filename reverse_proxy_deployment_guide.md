@@ -23,12 +23,6 @@ The deployment uses 4 separate services
 - also implements HTTPS
 - serves static webpack files to clients
 
-## Ports
-
-Expose wsl ports to windows
-Run as admin in powershell: 
-`configure_ports.ps1`
-
 ## CMR (Common Metadata Repository)
 
 ### Running CMR
@@ -57,6 +51,15 @@ Open WSL terminal and navigate to cmr repo root directory (/home/george/cmr)
 Command to stop the CMR (this will purge the database)
 `cmr stop uberjar dev-system`
 
+## Ports
+
+Expose wsl ports to windows
+
+Open WSL terminal to ensure WSL is running and has an allocated IP
+
+Run as admin in powershell: 
+`configure_ports.ps1`
+
 ### Upload metadata
 
 With a running CMR, run Intrepid's project manager
@@ -77,8 +80,7 @@ Open WSL terminal and navigate to cmr DDS directory
 
 `cd /home/george/cmr/browse-scaler/src`
 
-Check the settings in secret-config.js are valid
-If the config file is missing create a new one
+Check the settings in secret-config.js are valid. If the config file is missing create a new one
 
 `cp /home/george/cmr/browse-scaler/src/secret-config-example.js /home/george/cmr/browse-scaler/src/secret-config.js`
 
