@@ -359,13 +359,21 @@ if (secretConfig.USE_HTTPS) {
   // Certificate
   const privateKey = fs.readFileSync(secretConfig.privateKey, 'utf8');
   const certificate = fs.readFileSync(secretConfig.cert, 'utf8');
-  const ca = fs.readFileSync(secretConfig.chain, 'utf8');
 
-  const credentials = {
-    key: privateKey,
-    cert: certificate,
-    ca
-  };
+  let credentials = null;
+  if (secretConfig.chain) {
+    const ca = fs.readFileSync(secretConfig.chain, 'utf8');
+    credentials = {
+      key: privateKey,
+      cert: certificate,
+      ca
+    };
+  } else {
+    credentials = {
+      key: privateKey,
+      cert: certificate
+    };
+  }
 
   const httpsServer = https.createServer(credentials, app);
 
